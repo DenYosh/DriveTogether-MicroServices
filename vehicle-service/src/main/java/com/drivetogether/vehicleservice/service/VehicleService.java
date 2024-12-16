@@ -1,6 +1,9 @@
 package com.drivetogether.vehicleservice.service;
 
-import com.drivetogether.vehicleservice.dto.VehicleDTO;
+import com.drivetogether.vehicleservice.dto.VehicleModelRequestDTO;
+import com.drivetogether.vehicleservice.dto.VehicleModelResponseDTO;
+import com.drivetogether.vehicleservice.dto.VehicleRequestDTO;
+import com.drivetogether.vehicleservice.dto.VehicleResponseDTO;
 import com.drivetogether.vehicleservice.model.Vehicle;
 import com.drivetogether.vehicleservice.model.VehicleModel;
 import com.drivetogether.vehicleservice.repository.VehicleModelRepository;
@@ -9,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -17,42 +21,62 @@ public class VehicleService {
     private final VehicleRepository vehicleRepository;
     private final VehicleModelRepository vehicleModelRepository;
 
-    public VehicleDTO createVehicle(Long userId, VehicleDTO vehicleDTO) {
-        if (vehicleDTO.getId() == null) {
-            vehicleDTO.setOwnerId(userId);
+    public VehicleResponseDTO createVehicle(VehicleRequestDTO dto) {
+        VehicleModel model = vehicleModelRepository.findById(dto.getModelId())
+                .orElseThrow(() -> new RuntimeException("Model not found"));
 
-            if (!vehicleModelRepository.existsByModelName(vehicleDTO.getModel())) {
-                VehicleModel model = new VehicleModel();
-                model.setModelName(vehicleDTO.getModel());
-                vehicleModelRepository.save(model);
-            }
-
-            Vehicle veh = vehicleRepository.save(mapToVehicleDTO(vehicleDTO));
-            return mapToVehicle(veh);
-        }
-
-        throw new RuntimeException("Vehicle Already exists");
-    }
-
-    private Vehicle mapToVehicleDTO(VehicleDTO vehicleDTO) {
-        return Vehicle.builder()
-                .id(vehicleDTO.getId())
-                .ownerId(vehicleDTO.getOwnerId())
-                .licensePlate(vehicleDTO.getLicensePlate())
-                .make(vehicleDTO.getMake())
-                .model(vehicleModelRepository.findByModelName(vehicleDTO.getModel()))
-                .capacity(vehicleDTO.getCapacity())
+        Vehicle vehicle = Vehicle.builder()
+                .ownerId(dto.getOwnerId())
+                .licensePlate(dto.getLicensePlate())
+                .make(dto.getMake())
+                .model(model)
+                .capacity(dto.getCapacity())
                 .build();
+
+        vehicle = vehicleRepository.save(vehicle);
+        return mapToResponseDTO(vehicle);
     }
 
-    private VehicleDTO mapToVehicle(Vehicle vehicle) {
-        return VehicleDTO.builder()
+    public List<VehicleResponseDTO> getAllVehicles() {
+        return vehicleRepository.findAll()
+                .stream()
+                .map(this::mapToResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    private VehicleResponseDTO mapToResponseDTO(Vehicle vehicle) {
+        return VehicleResponseDTO.builder()
                 .id(vehicle.getId())
                 .ownerId(vehicle.getOwnerId())
                 .licensePlate(vehicle.getLicensePlate())
                 .make(vehicle.getMake())
-                .model(vehicle.getModel().getModelName())
+                .modelName(vehicle.getModel().getModelName())
                 .capacity(vehicle.getCapacity())
+                .build();
+    }
+
+
+//    Vehicle models
+
+    public VehicleModelResponseDTO createVehicleModel(VehicleModelRequestDTO dto) {
+        VehicleModel model = VehicleModel.builder()
+                .modelName(dto.getModelName())
+                .build();
+        model = vehicleModelRepository.save(model);
+        return mapToResponseDTO(model);
+    }
+
+    public List<VehicleModelResponseDTO> getAllVehicleModels() {
+        return vehicleModelRepository.findAll()
+                .stream()
+                .map(this::mapToResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    private VehicleModelResponseDTO mapToResponseDTO(VehicleModel model) {
+        return VehicleModelResponseDTO.builder()
+                .id(model.getId())
+                .modelName(model.getModelName())
                 .build();
     }
 }

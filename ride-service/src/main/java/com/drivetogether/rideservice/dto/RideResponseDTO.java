@@ -1,41 +1,24 @@
-package com.drivetogether.rideservice.model;
+package com.drivetogether.rideservice.dto;
 
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
-@Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Ride {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class RideResponseDTO {
     private Long id;
-
-    @Column(nullable = false)
     private Long carId;
-
-    @Column(nullable = false)
     private String source;
-
-    @Column(nullable = false)
     private String destination;
-
-    @Column(nullable = false)
     private LocalDateTime startTime;
-
-    @Column(nullable = false)
     private LocalDateTime endTime;
-
-    @Column(nullable = false)
     private Integer availableSeats;
-
     private Boolean completed;
 }

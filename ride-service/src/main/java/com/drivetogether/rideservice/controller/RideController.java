@@ -1,9 +1,9 @@
 package com.drivetogether.rideservice.controller;
 
-import com.drivetogether.rideservice.model.Ride;
+import com.drivetogether.rideservice.dto.RideRequestDTO;
+import com.drivetogether.rideservice.dto.RideResponseDTO;
 import com.drivetogether.rideservice.service.RideService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,24 +14,20 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RideController {
 
-    private RideService rideService;
+    private final RideService rideService;
 
     @PostMapping
-    public ResponseEntity<Ride> createRide(@RequestBody Ride ride) {
-        Ride createdRide = rideService.createRide(ride);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdRide);
+    public ResponseEntity<RideResponseDTO> createRide(@RequestBody RideRequestDTO rideRequestDTO) {
+        return ResponseEntity.ok(rideService.createRide(rideRequestDTO));
     }
 
     @GetMapping
-    public ResponseEntity<List<Ride>> searchRides(
-            @RequestParam String source,
-            @RequestParam String destination) {
-        return ResponseEntity.ok(rideService.searchRides(source, destination));
+    public ResponseEntity<List<RideResponseDTO>> getAllRides() {
+        return ResponseEntity.ok(rideService.getAllRides());
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteRide(@PathVariable Long id) {
-        rideService.deleteRide(id);
-        return ResponseEntity.noContent().build();
+    @PutMapping("/{rideId}/complete")
+    public ResponseEntity<RideResponseDTO> completeRide(@PathVariable Long rideId) {
+        return ResponseEntity.ok(rideService.completeRide(rideId));
     }
 }
