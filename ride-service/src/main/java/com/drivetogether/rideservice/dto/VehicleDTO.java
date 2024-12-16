@@ -1,4 +1,4 @@
-package com.drivetogether.vehicleservice.dto;
+package com.drivetogether.rideservice.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -6,10 +6,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
-public class VehicleResponseDTO {
+public class VehicleDTO {
     private Long id;
     private VehicleOwnerDTO owner;
     private String licensePlate;

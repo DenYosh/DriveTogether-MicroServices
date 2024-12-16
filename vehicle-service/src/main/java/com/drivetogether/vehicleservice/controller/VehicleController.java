@@ -1,9 +1,6 @@
 package com.drivetogether.vehicleservice.controller;
 
-import com.drivetogether.vehicleservice.dto.VehicleModelRequestDTO;
-import com.drivetogether.vehicleservice.dto.VehicleModelResponseDTO;
-import com.drivetogether.vehicleservice.dto.VehicleRequestDTO;
-import com.drivetogether.vehicleservice.dto.VehicleResponseDTO;
+import com.drivetogether.vehicleservice.dto.*;
 import com.drivetogether.vehicleservice.service.VehicleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -13,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/vehicles")
+@RequestMapping("/api/vehicle")
 @RequiredArgsConstructor
 public class VehicleController {
 
@@ -28,6 +25,16 @@ public class VehicleController {
     @GetMapping
     public ResponseEntity<List<VehicleResponseDTO>> getAllVehicles() {
         return ResponseEntity.ok(vehicleService.getAllVehicles());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<VehicleResponseDTO> getVehicleById(@PathVariable Long id) {
+        return ResponseEntity.ok(vehicleService.getVehicleById(id));
+    }
+
+    @GetMapping("/user/{id}")
+    public ResponseEntity<List<VehicleResponseMinimalDTO>> getVehiclesByUserId(@PathVariable Long id) {
+        return ResponseEntity.ok(vehicleService.getVehiclesByUserId(id));
     }
 
     @PostMapping("/models")

@@ -1,5 +1,6 @@
 package com.drivetogether.userservice.controller;
 
+import com.drivetogether.userservice.dto.UserCarsResponse;
 import com.drivetogether.userservice.dto.UserRequestDTO;
 import com.drivetogether.userservice.dto.UserResponseDTO;
 import com.drivetogether.userservice.service.UserService;
@@ -23,7 +24,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Long id) {
+    public ResponseEntity<UserCarsResponse> getUserById(@PathVariable Long id) {
         return ResponseEntity.ok(userService.getUserById(id));
     }
 

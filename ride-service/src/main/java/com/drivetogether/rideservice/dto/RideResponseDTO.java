@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 @Data
 @NoArgsConstructor
@@ -14,7 +13,7 @@ import java.time.LocalTime;
 @Builder
 public class RideResponseDTO {
     private Long id;
-    private Long carId;
+    private VehicleDTO vehicle;
     private String source;
     private String destination;
     private LocalDateTime startTime;

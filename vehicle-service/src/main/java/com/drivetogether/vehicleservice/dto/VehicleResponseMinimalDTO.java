@@ -9,9 +9,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class VehicleResponseDTO {
+public class VehicleResponseMinimalDTO {
     private Long id;
-    private VehicleOwnerDTO owner;
     private String licensePlate;
     private String make;
     private String modelName;
