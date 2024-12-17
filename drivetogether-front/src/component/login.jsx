@@ -1,6 +1,8 @@
+import { RedirectUri } from "../recoil/store";
+
 function Login() {
 	const clientId = process.env.REACT_APP_CLIENT_ID;
-	const redirectUri = process.env.REACT_APP_REDIRECT_URI;
+	const redirectUri = RedirectUri;
 	const authUrl = process.env.REACT_APP_AUTH_URL;
 	const scope = process.env.REACT_APP_SCOPE;
 
