@@ -134,7 +134,7 @@ jobs:
             - name: Upload container to Docker Hub with Push
               run: docker push ${{ secrets.DOCKER_USER }}/api-gateway:latest
     frontend:
-        runs-on: node-latest
+        runs-on: ubuntu-latest
         name: Build, test, deliver frontend React app container
         steps:
             - name: Check out repository
