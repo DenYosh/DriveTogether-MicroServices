@@ -122,7 +122,7 @@ services:
     drivetogether-front:
         image: denyosh/drivetogether-front
         ports:
-            - 8085:8085
+            - 80:80
         links:
             - api-gateway
         environment:
