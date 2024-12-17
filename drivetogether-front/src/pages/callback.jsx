@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSetRecoilState } from "recoil";
-import { Bearertoken } from "../recoil/store";
+import { Bearertoken, RedirectUri } from "../recoil/store";
 
 function Callback() {
 	const navigate = useNavigate();
@@ -20,7 +20,7 @@ function Callback() {
 		const body = new URLSearchParams();
 		body.append("grant_type", "authorization_code");
 		body.append("code", code);
-		body.append("redirect_uri", process.env.REACT_APP_REDIRECT_URI);
+		body.append("redirect_uri", RedirectUri);
 		body.append("client_id", process.env.REACT_APP_CLIENT_ID);
 		body.append("client_secret", process.env.REACT_APP_CLIENT_SECRET);
 
