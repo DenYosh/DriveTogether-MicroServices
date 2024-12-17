@@ -120,7 +120,7 @@ services:
             BOOKING_SERVICE_BASEURL: booking-service:8083
 
     drivetogether-front:
-        image: denyosh/drivetogether-front
+        image: denyosh/drivetogether-frontend
         ports:
             - 80:80
         links:
