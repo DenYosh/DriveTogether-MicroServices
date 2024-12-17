@@ -1,6 +1,7 @@
 package com.drivetogether.bookingservice.controller;
 
 import com.drivetogether.bookingservice.dto.BookingRequestDTO;
+import com.drivetogether.bookingservice.dto.BookingRequestMinimalDTO;
 import com.drivetogether.bookingservice.dto.BookingResponseDTO;
 import com.drivetogether.bookingservice.model.Booking;
 import com.drivetogether.bookingservice.service.BookingService;
@@ -27,10 +28,5 @@ public class BookingController {
     public ResponseEntity<Void> deleteBooking(@PathVariable String id) {
         bookingService.deleteBooking(id);
         return ResponseEntity.noContent().build();
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<BookingResponseDTO> updateBooking(@PathVariable String id, @RequestBody BookingRequestDTO bookingRequestDTO) {
-        return ResponseEntity.ok(bookingService.updateBooking(id, bookingRequestDTO));
     }
 }

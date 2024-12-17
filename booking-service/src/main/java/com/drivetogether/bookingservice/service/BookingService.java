@@ -1,11 +1,15 @@
 package com.drivetogether.bookingservice.service;
 
 import com.drivetogether.bookingservice.dto.BookingRequestDTO;
+import com.drivetogether.bookingservice.dto.BookingRequestMinimalDTO;
 import com.drivetogether.bookingservice.dto.BookingResponseDTO;
+import com.drivetogether.bookingservice.dto.RideDTO;
 import com.drivetogether.bookingservice.model.Booking;
 import com.drivetogether.bookingservice.repository.BookingRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,29 +19,57 @@ import java.util.List;
 public class BookingService {
 
     private final BookingRepository bookingRepository;
+    private final WebClient webClient;
+
+    @Value("${rideservice.baseurl}")
+    private String rideServiceBaseUrl;
 
     public BookingResponseDTO createBooking(BookingRequestDTO bookingRequestDTO) {
-        Booking booking = Booking.builder()
-                .userId(bookingRequestDTO.getUserId())
-                .rideId(bookingRequestDTO.getRideId())
-                .seatsBooked(bookingRequestDTO.getSeatsBooked())
-                .bookingTime(LocalDateTime.now())
-                .build();
-        booking = bookingRepository.save(booking);
-        return mapToResponseDTO(booking);
+        RideDTO rideDTO = webClient.get()
+                .uri("http://" + rideServiceBaseUrl + "/api/ride/" + bookingRequestDTO.getRideId())
+                .retrieve()
+                .bodyToMono(RideDTO.class)
+                .block();
+
+        if (rideDTO != null) {
+
+            if (rideDTO.isCompleted()) {
+                throw new RuntimeException("Booking is completed");
+            }
+
+            if (rideDTO.getAvailableSeats() - bookingRequestDTO.getSeatsBooked() < 0) {
+                throw new RuntimeException("No seats available");
+            }
+
+            webClient.put()
+                    .uri("http://" + rideServiceBaseUrl + "/api/ride/" + bookingRequestDTO.getRideId() + "/seatsBooked?delete=false&seatsBooked=" + bookingRequestDTO.getSeatsBooked())
+                    .retrieve()
+                    .bodyToMono(RideDTO.class)
+                    .block();
+
+            Booking booking = Booking.builder()
+                    .userId(bookingRequestDTO.getUserId())
+                    .rideId(bookingRequestDTO.getRideId())
+                    .seatsBooked(bookingRequestDTO.getSeatsBooked())
+                    .bookingTime(LocalDateTime.now())
+                    .build();
+            booking = bookingRepository.save(booking);
+            return mapToResponseDTO(booking);
+        }
+
+        throw new RuntimeException("No ride found.");
     }
 
     public void deleteBooking(String id) {
-        bookingRepository.deleteById(id);
-    }
+        Booking booking = bookingRepository.findById(id).orElseThrow(() -> new RuntimeException("Id not found"));
 
-    public BookingResponseDTO updateBooking(String id, BookingRequestDTO bookingRequestDTO) {
-        Booking booking = bookingRepository.findById(id).orElseThrow(() -> new RuntimeException("Booking not found"));
-        booking.setUserId(bookingRequestDTO.getUserId());
-        booking.setRideId(bookingRequestDTO.getRideId());
-        booking.setSeatsBooked(bookingRequestDTO.getSeatsBooked());
-        booking = bookingRepository.save(booking);
-        return mapToResponseDTO(booking);
+        webClient.put()
+                .uri("http://" + rideServiceBaseUrl + "/api/ride/" + booking.getRideId() + "/seatsBooked?delete=true&seatsBooked=" + booking.getSeatsBooked())
+                .retrieve()
+                .bodyToMono(RideDTO.class)
+                .block();
+
+        bookingRepository.delete(booking);
     }
 
     private BookingResponseDTO mapToResponseDTO(Booking booking) {
