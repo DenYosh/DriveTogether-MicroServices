@@ -1,126 +1,135 @@
 services:
-  mongo-booking:
-    image: mongo:latest
-    ports:
-      - 27017:27017
-    volumes:
-      - mongodb_booking_data:/data/db
+    mongo-booking:
+        image: mongo:latest
+        ports:
+            - 27017:27017
+        volumes:
+            - mongodb_booking_data:/data/db
 
-  mysql-user:
-    image: mysql:latest
-    ports:
-      - 3309:3306
-    volumes:
-      - mysql_user_data:/var/lib/mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: abc123
+    mysql-user:
+        image: mysql:latest
+        ports:
+            - 3309:3306
+        volumes:
+            - mysql_user_data:/var/lib/mysql
+        environment:
+            MYSQL_ROOT_PASSWORD: abc123
 
-  mysql-vehicle:
-    image: mysql:latest
-    ports:
-      - 3307:3306
-    volumes:
-      - mysql_vehicle_data:/var/lib/mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: abc123
+    mysql-vehicle:
+        image: mysql:latest
+        ports:
+            - 3307:3306
+        volumes:
+            - mysql_vehicle_data:/var/lib/mysql
+        environment:
+            MYSQL_ROOT_PASSWORD: abc123
 
-  mysql-ride:
-    image: mysql:latest
-    ports:
-      - 3308:3306
-    volumes:
-      - mysql_ride_data:/var/lib/mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: abc123
+    mysql-ride:
+        image: mysql:latest
+        ports:
+            - 3308:3306
+        volumes:
+            - mysql_ride_data:/var/lib/mysql
+        environment:
+            MYSQL_ROOT_PASSWORD: abc123
 
-  user-service:
-    depends_on:
-      - mysql-user
-      - booking-service
-    image: denyosh/user-service
-    ports:
-      - 8080:8080
-    links:
-      - mysql-user
-    environment:
-      VEHICLE_SERVICE_BASEURL: vehicle-service:8081
-      RIDE_SERVICE_BASEURL: ride-service:8082
-      BOOKING_SERVICE_BASEURL: booking-service:8083
-      MYSQL_DB_USERNAME: root
-      MYSQL_DB_PASSWORD: abc123
-      MYSQL_DB_HOST: mysql-user
-      MYSQL_DB_PORT: 3306
+    user-service:
+        depends_on:
+            - mysql-user
+            - booking-service
+        image: denyosh/user-service
+        ports:
+            - 8080:8080
+        links:
+            - mysql-user
+        environment:
+            VEHICLE_SERVICE_BASEURL: vehicle-service:8081
+            RIDE_SERVICE_BASEURL: ride-service:8082
+            BOOKING_SERVICE_BASEURL: booking-service:8083
+            MYSQL_DB_USERNAME: root
+            MYSQL_DB_PASSWORD: abc123
+            MYSQL_DB_HOST: mysql-user
+            MYSQL_DB_PORT: 3306
 
-  vehicle-service:
-    depends_on:
-      - mysql-vehicle
-      - booking-service
-    image: denyosh/vehicle-service
-    ports:
-      - 8081:8081
-    links:
-      - mysql-vehicle
-    environment:
-      USER_SERVICE_BASEURL: user-service:8080
-      RIDE_SERVICE_BASEURL: ride-service:8082
-      BOOKING_SERVICE_BASEURL: booking-service:8083
-      MYSQL_DB_USERNAME: root
-      MYSQL_DB_PASSWORD: abc123
-      MYSQL_DB_HOST: mysql-vehicle
-      MYSQL_DB_PORT: 3307
+    vehicle-service:
+        depends_on:
+            - mysql-vehicle
+            - booking-service
+        image: denyosh/vehicle-service
+        ports:
+            - 8081:8081
+        links:
+            - mysql-vehicle
+        environment:
+            USER_SERVICE_BASEURL: user-service:8080
+            RIDE_SERVICE_BASEURL: ride-service:8082
+            BOOKING_SERVICE_BASEURL: booking-service:8083
+            MYSQL_DB_USERNAME: root
+            MYSQL_DB_PASSWORD: abc123
+            MYSQL_DB_HOST: mysql-vehicle
+            MYSQL_DB_PORT: 3307
 
-  ride-service:
-    depends_on:
-      - mysql-ride
-      - booking-service
-    image: denyosh/ride-service
-    ports:
-      - 8082:8082
-    links:
-      - mysql-ride
-    environment:
-      USER_SERVICE_BASEURL: user-service:8080
-      VEHICLE_SERVICE_BASEURL: vehicle-service:8081
-      BOOKING_SERVICE_BASEURL: booking-service:8083
-      MYSQL_DB_USERNAME: root
-      MYSQL_DB_PASSWORD: abc123
-      MYSQL_DB_HOST: mysql-ride
-      MYSQL_DB_PORT: 3306
+    ride-service:
+        depends_on:
+            - mysql-ride
+            - booking-service
+        image: denyosh/ride-service
+        ports:
+            - 8082:8082
+        links:
+            - mysql-ride
+        environment:
+            USER_SERVICE_BASEURL: user-service:8080
+            VEHICLE_SERVICE_BASEURL: vehicle-service:8081
+            BOOKING_SERVICE_BASEURL: booking-service:8083
+            MYSQL_DB_USERNAME: root
+            MYSQL_DB_PASSWORD: abc123
+            MYSQL_DB_HOST: mysql-ride
+            MYSQL_DB_PORT: 3306
 
-  booking-service:
-    depends_on:
-      - mongo-booking
-    image: denyosh/booking-service
-    ports:
-      - 8083:8083
-    links:
-      - mongo-booking
-    environment:
-      MONGODB_PORT: 27017
-      MONGODB_HOST: mongo-booking
+    booking-service:
+        depends_on:
+            - mongo-booking
+        image: denyosh/booking-service
+        ports:
+            - 8083:8083
+        links:
+            - mongo-booking
+        environment:
+            MONGODB_PORT: 27017
+            MONGODB_HOST: mongo-booking
 
-  api-gateway:
-    depends_on:
-      - user-service
-      - vehicle-service
-      - ride-service
-      - booking-service
-    image: denyosh/api-gateway
-    ports:
-      - 8084:8084
-    links:
-      - vehicle-service
-      - ride-service
-      - booking-service
-      - user-service
-    environment:
-      USER_SERVICE_BASEURL: user-service:8080
-      VEHICLE_SERVICE_BASEURL: vehicle-service:8081
-      RIDE_SERVICE_BASEURL: ride-service:8082
-      BOOKING_SERVICE_BASEURL: booking-service:8083
+    api-gateway:
+        depends_on:
+            - user-service
+            - vehicle-service
+            - ride-service
+            - booking-service
+        image: denyosh/api-gateway
+        ports:
+            - 8084:8084
+        links:
+            - vehicle-service
+            - ride-service
+            - booking-service
+            - user-service
+        environment:
+            USER_SERVICE_BASEURL: user-service:8080
+            VEHICLE_SERVICE_BASEURL: vehicle-service:8081
+            RIDE_SERVICE_BASEURL: ride-service:8082
+            BOOKING_SERVICE_BASEURL: booking-service:8083
+
+    drivetogether-front:
+        image: denyosh/drivetogether-front
+        ports:
+            - 8085:8085
+        links:
+            - api-gateway
+        environment:
+            API_GATEWAY_BASEURL: api-gateway:8084
 
 volumes:
-  mysql_user_data:
-  mysql_vehicle_data:
-  mysql_ride_data:
-  mongodb_booking_data:
+    mysql_user_data:
+    mysql_vehicle_data:
+    mysql_ride_data:
+    mongodb_booking_data:
