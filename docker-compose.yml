@@ -125,9 +125,6 @@ services:
             - 80:80
         links:
             - api-gateway
-        environment:
-            REACT_APP_API_GATEWAY_BASEURL: api-gateway:8084
-            REACT_APP_REDIRECT_URI: http://localhost
 
 volumes:
     mysql_user_data:
