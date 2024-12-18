@@ -37,6 +37,16 @@ public class UserService {
         return mapToResponseDTO(user);
     }
 
+    public UserResponseDTO editUser(Long id, UserRequestDTO userRequestDTO) {
+        User user = userRepository.getReferenceById(id);
+        user.setName(userRequestDTO.getName());
+        user.setEmail(userRequestDTO.getEmail());
+        user.setAddress(userRequestDTO.getAddress());
+        user.setPhoneNumber(userRequestDTO.getPhoneNumber());
+
+        return mapToResponseDTO(userRepository.save(user));
+    }
+
     public UserCarsResponse getUserById(Long id) {
         User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
         return mapToCarsResponseDTO(user);

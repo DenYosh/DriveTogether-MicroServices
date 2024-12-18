@@ -23,6 +23,11 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(userRequestDTO));
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<UserResponseDTO> editUser(@PathVariable Long id, @RequestBody UserRequestDTO userRequestDTO) {
+        return ResponseEntity.ok(userService.editUser(id, userRequestDTO));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<UserCarsResponse> getUserById(@PathVariable Long id) {
         return ResponseEntity.ok(userService.getUserById(id));

@@ -10,6 +10,7 @@ import Profile from "./pages/profile";
 import Users from "./pages/users";
 import { useRecoilValue } from "recoil";
 import { Bearertoken } from "./recoil/store";
+import Models from "./pages/models";
 
 function App() {
 	const bearerToken = useRecoilValue(Bearertoken);
@@ -31,6 +32,10 @@ function App() {
 									<Route
 										path="/profile"
 										element={<Profile />}
+									/>
+									<Route
+										path="/models"
+										element={<Models />}
 									/>
 								</>
 							)}

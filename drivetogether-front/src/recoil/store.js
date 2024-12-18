@@ -14,3 +14,8 @@ export const Bearertoken = atom({
 	key: "Bearertoken",
 	default: null,
 });
+
+export const User = atom({
+	key: "User",
+	default: null,
+});

@@ -48,12 +48,12 @@ const Navbar = () => {
 							</li>
 							<li>
 								<Link
-									to="/my-cars"
+									to="/models"
 									className={`hover:text-white ${
-										isActive("/my-cars") ? "text-white" : ""
+										isActive("/models") ? "text-white" : ""
 									}`}
 								>
-									My Cars
+									All models
 								</Link>
 							</li>
 							<li>
