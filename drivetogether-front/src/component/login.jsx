@@ -13,7 +13,14 @@ function Login() {
 		window.location.href = url;
 	}
 
-	return <button onClick={redirectToAuth}>Login with Google</button>;
+	return (
+		<button
+			onClick={redirectToAuth}
+			className="bg-red-500 text-gray-200 border-none py-2 px-4 text-lg rounded-md cursor-pointer transition-transform duration-300 hover:bg-red-700 hover:scale-105"
+		>
+			Login with Google
+		</button>
+	);
 }
 
 export default Login;
