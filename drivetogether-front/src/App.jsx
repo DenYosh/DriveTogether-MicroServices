@@ -1,37 +1,44 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
 import "./App.css";
+import React from "react";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import Callback from "./pages/callback";
+import Home from "./pages/home";
+import Navbar from "./component/nav";
+import Footer from "./component/footer";
+import Rides from "./pages/rides";
+import Profile from "./pages/profile";
+import Users from "./pages/users";
+import { useRecoilValue } from "recoil";
+import { Bearertoken } from "./recoil/store";
 
 function App() {
-	const [count, setCount] = useState(0);
+	const bearerToken = useRecoilValue(Bearertoken);
 
 	return (
 		<>
-			<div>
-				<a href="https://vite.dev" target="_blank">
-					<img src={viteLogo} className="logo" alt="Vite logo" />
-				</a>
-				<a href="https://react.dev" target="_blank">
-					<img
-						src={reactLogo}
-						className="logo react"
-						alt="React logo"
-					/>
-				</a>
-			</div>
-			<h1>Vite + React</h1>
-			<div className="card">
-				<button onClick={() => setCount((count) => count + 1)}>
-					count is {count}
-				</button>
-				<p>
-					Edit <code>src/App.jsx</code> and save to test HMR
-				</p>
-			</div>
-			<p className="read-the-docs">
-				Click on the Vite and React logos to learn more
-			</p>
+			<Router>
+				<div className="flex flex-col min-h-screen">
+					<Navbar />
+					<div className="container mx-auto flex-grow">
+						<Routes>
+							<Route path="/" element={<Home />} />
+							<Route path="/callback" element={<Callback />} />
+							<Route path="/rides" element={<Rides />} />
+
+							{bearerToken && (
+								<>
+									<Route path="/users" element={<Users />} />
+									<Route
+										path="/profile"
+										element={<Profile />}
+									/>
+								</>
+							)}
+						</Routes>
+					</div>
+					<Footer />
+				</div>
+			</Router>
 		</>
 	);
 }

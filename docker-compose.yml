@@ -125,8 +125,6 @@ services:
             - 80:80
         links:
             - api-gateway
-        environment:
-            API_GATEWAY_BASEURL: api-gateway:8084
 
 volumes:
     mysql_user_data:
