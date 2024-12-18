@@ -3,7 +3,6 @@ package com.drivetogether.vehicleservice.controller;
 import com.drivetogether.vehicleservice.dto.*;
 import com.drivetogether.vehicleservice.service.VehicleService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,7 +14,6 @@ import java.util.List;
 public class VehicleController {
 
     private final VehicleService vehicleService;
-
 
     @PostMapping
     public ResponseEntity<VehicleResponseDTO> createVehicle(@RequestBody VehicleRequestDTO dto) {
