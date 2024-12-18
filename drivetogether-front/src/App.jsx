@@ -7,8 +7,13 @@ import Navbar from "./component/nav";
 import Footer from "./component/footer";
 import Rides from "./pages/rides";
 import Profile from "./pages/profile";
+import Users from "./pages/users";
+import { useRecoilValue } from "recoil";
+import { Bearertoken } from "./recoil/store";
 
 function App() {
+	const bearerToken = useRecoilValue(Bearertoken);
+
 	return (
 		<>
 			<Router>
@@ -18,9 +23,17 @@ function App() {
 						<Routes>
 							<Route path="/" element={<Home />} />
 							<Route path="/callback" element={<Callback />} />
-
 							<Route path="/rides" element={<Rides />} />
-							<Route path="/profile" element={<Profile />} />
+
+							{bearerToken && (
+								<>
+									<Route path="/users" element={<Users />} />
+									<Route
+										path="/profile"
+										element={<Profile />}
+									/>
+								</>
+							)}
 						</Routes>
 					</div>
 					<Footer />

@@ -1,17 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { ApiUrl, Bearertoken } from "../recoil/store";
-import { useRecoilValue } from "recoil";
+import { ApiUrl } from "../recoil/store";
 
 const Rides = () => {
 	const [rides, setRides] = useState([]);
-	const bearerToken = useRecoilValue(Bearertoken);
 
 	useEffect(() => {
-		fetch(`${ApiUrl}/rides`, {
-			headers: {
-				Authorization: `Bearer ${bearerToken}`,
-			},
-		})
+		fetch(`${ApiUrl}/rides`)
 			.then((response) => response.json())
 			.then((data) => setRides(data))
 			.catch((error) => console.error("Error fetching rides:", error));

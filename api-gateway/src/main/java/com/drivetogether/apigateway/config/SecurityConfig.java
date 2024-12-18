@@ -21,7 +21,7 @@ public class SecurityConfig {
         serverHttpSecurity
                 .cors(withDefaults())
                 .authorizeExchange(exchange ->
-                        exchange.pathMatchers(HttpMethod.GET,"/users")
+                        exchange.pathMatchers(HttpMethod.GET,"/rides")
                                 .permitAll()
                                 .anyExchange()
                                 .authenticated()
