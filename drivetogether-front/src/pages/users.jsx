@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ApiUrl, Bearertoken, User } from "../recoil/store";
 import { useRecoilState, useRecoilValue } from "recoil";
+import useShowNotification from "../component/notification";
 
 const Users = () => {
 	const [users, setUsers] = useState([]);
@@ -14,6 +15,8 @@ const Users = () => {
 	});
 	const bearerToken = useRecoilValue(Bearertoken);
 	const [globalUser, setGlobalUser] = useRecoilState(User);
+
+	const showNotification = useShowNotification();
 
 	useEffect(() => {
 		fetch(`${ApiUrl}/users`, {
@@ -69,6 +72,12 @@ const Users = () => {
 					setUsers([...users, data]);
 				}
 				handleCloseModal();
+				showNotification(
+					selectedUser
+						? "User updated successfully"
+						: "User added successfully",
+					"success"
+				);
 			})
 			.catch((error) => console.error("Error saving user:", error));
 	};

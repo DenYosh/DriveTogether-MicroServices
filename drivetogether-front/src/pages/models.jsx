@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { ApiUrl, Bearertoken } from "../recoil/store";
 import { useRecoilValue } from "recoil";
+import useShowNotification from "../component/notification";
 
 const Models = () => {
 	const [models, setModels] = useState([]);
 	const [newModel, setNewModel] = useState("");
 	const bearerToken = useRecoilValue(Bearertoken);
+	const showNotification = useShowNotification();
 
 	useEffect(() => {
 		fetch(ApiUrl + "/vehicles/models", {
@@ -30,7 +32,10 @@ const Models = () => {
 			body: JSON.stringify({ modelName: newModel }),
 		})
 			.then((response) => response.json())
-			.then((data) => setModels([...models, data]))
+			.then((data) => {
+				setModels([...models, data]);
+				showNotification("Model added successfully", "success");
+			})
 			.catch((error) => console.error("Error adding model:", error));
 
 		setNewModel("");

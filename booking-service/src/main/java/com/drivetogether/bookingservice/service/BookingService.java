@@ -1,9 +1,6 @@
 package com.drivetogether.bookingservice.service;
 
-import com.drivetogether.bookingservice.dto.BookingRequestDTO;
-import com.drivetogether.bookingservice.dto.BookingRequestMinimalDTO;
-import com.drivetogether.bookingservice.dto.BookingResponseDTO;
-import com.drivetogether.bookingservice.dto.RideDTO;
+import com.drivetogether.bookingservice.dto.*;
 import com.drivetogether.bookingservice.model.Booking;
 import com.drivetogether.bookingservice.repository.BookingRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +10,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -72,6 +70,14 @@ public class BookingService {
         bookingRepository.delete(booking);
     }
 
+    public List<BookingCarResponseDTO> getBookingByUserId(String id) {
+        List<Booking> bookings = bookingRepository.findAllByUserId(id);
+
+        return bookings.stream()
+                .map(this::mapToCarResponseDTO)
+                .collect(Collectors.toList());
+    }
+
     private BookingResponseDTO mapToResponseDTO(Booking booking) {
         return BookingResponseDTO.builder()
                 .id(booking.getId())
@@ -81,4 +87,22 @@ public class BookingService {
                 .bookingTime(booking.getBookingTime())
                 .build();
     }
+
+    private BookingCarResponseDTO mapToCarResponseDTO(Booking booking) {
+        RideFullDTO rideDTO = webClient.get()
+                .uri("http://" + rideServiceBaseUrl + "/api/ride/" + booking.getRideId())
+                .retrieve()
+                .bodyToMono(RideFullDTO.class)
+                .block();
+
+        return BookingCarResponseDTO.builder()
+                .id(booking.getId())
+                .userId(booking.getUserId())
+                .ride(rideDTO)
+                .seatsBooked(booking.getSeatsBooked())
+                .bookingTime(booking.getBookingTime())
+                .build();
+
+    }
+
 }

@@ -11,6 +11,8 @@ import Users from "./pages/users";
 import { useRecoilValue } from "recoil";
 import { Bearertoken } from "./recoil/store";
 import Models from "./pages/models";
+import Bookings from "./pages/bookings";
+import { Notification } from "./component/notification";
 
 function App() {
 	const bearerToken = useRecoilValue(Bearertoken);
@@ -19,6 +21,7 @@ function App() {
 		<>
 			<Router>
 				<div className="flex flex-col min-h-screen">
+					<Notification />
 					<Navbar />
 					<div className="container mx-auto flex-grow">
 						<Routes>
@@ -36,6 +39,10 @@ function App() {
 									<Route
 										path="/models"
 										element={<Models />}
+									/>
+									<Route
+										path="/my-bookings"
+										element={<Bookings />}
 									/>
 								</>
 							)}

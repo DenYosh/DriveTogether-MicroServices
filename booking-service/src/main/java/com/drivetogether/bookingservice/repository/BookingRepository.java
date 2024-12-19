@@ -7,4 +7,5 @@ import java.util.List;
 import java.util.Optional;
 
 public interface BookingRepository extends MongoRepository<Booking, String> {
+    List<Booking> findAllByUserId(String userId);
 }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ApiUrl, Bearertoken, User } from "../recoil/store";
 import { useRecoilValue } from "recoil";
+import useShowNotification from "../component/notification";
 
 const Profile = () => {
 	const [user, setUser] = useState(null);
@@ -23,6 +24,8 @@ const Profile = () => {
 		endTime: "",
 		availableSeats: "",
 	});
+
+	const showNotification = useShowNotification();
 
 	useEffect(() => {
 		const fetchUserData = async () => {
@@ -92,6 +95,7 @@ const Profile = () => {
 				modelId: "",
 				capacity: "",
 			});
+			showNotification("Vehicle added successfully", "success");
 		} catch (error) {
 			console.error("Error adding vehicle:", error);
 		}
@@ -123,6 +127,7 @@ const Profile = () => {
 				availableSeats: "",
 			});
 			setModelOpen(false);
+			showNotification("Ride added successfully", "success");
 		} catch (error) {
 			console.error("Error adding ride:", error);
 		}
