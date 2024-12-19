@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: nginx-ingress-controller
+    namespace: ingress-nginx
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: nginx-ingress-controller
+    template:
+        metadata:
+            labels:
+                app: nginx-ingress-controller
+        spec:
+            containers:
+                - name: nginx-ingress-controller
+                  image: nginx/nginx-ingress:stable
+                  args:
+                      - "/nginx-ingress-controller"
+                      - "--configmap=$(drive-together)/nginx-ingress-controller"
+                  ports:
+                      - containerPort: 80
+                        name: http
+                      - containerPort: 443
+                        name: https
+                  env:
+                      - name: drive-together
+                        valueFrom:
+                            fieldRef:
+                                fieldPath: metadata.namespace
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: nginx-ingress-service
+    namespace: ingress-nginx
+spec:
+    ports:
+        - port: 80
+          targetPort: 80
+          name: http
+        - port: 443
+          targetPort: 443
+          name: https
+    selector:
+        app: nginx-ingress-controller
+    type: LoadBalancer
