@@ -19,6 +19,7 @@ const Users = () => {
 	const showNotification = useShowNotification();
 
 	useEffect(() => {
+		console.log("API URL:", ApiUrl);
 		fetch(`${ApiUrl}/users`, {
 			headers: {
 				Authorization: `Bearer ${bearerToken}`,

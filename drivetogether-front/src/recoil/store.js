@@ -2,7 +2,7 @@ import { atom } from "recoil";
 
 export const ApiUrl =
 	process.env.NODE_ENV == "production"
-		? "api-gateway:8084"
+		? "http://localhost:8084"
 		: "http://localhost:8084";
 
 export const RedirectUri =
