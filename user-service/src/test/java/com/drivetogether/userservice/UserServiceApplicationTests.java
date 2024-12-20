@@ -13,6 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
 import java.util.List;
@@ -34,6 +35,15 @@ public class UserServiceApplicationTests {
 
     @Mock
     private WebClient webClient;
+
+    @Mock
+    private WebClient.RequestHeadersUriSpec requestHeadersUriSpecMock;
+
+    @Mock
+    private WebClient.RequestHeadersSpec requestHeadersSpecMock;
+
+    @Mock
+    private WebClient.ResponseSpec responseSpecMock;
 
     @Test
     public void testCreateUser() {
@@ -80,6 +90,12 @@ public class UserServiceApplicationTests {
 
         VehicleDTO vehicleDTO = new VehicleDTO();
         vehicleDTO.setId(1L);
+        VehicleDTO[] vehicleDTOArray = {vehicleDTO};
+
+        when(webClient.get()).thenReturn(requestHeadersUriSpecMock);
+        when(requestHeadersUriSpecMock.uri(eq("http://null/api/vehicle/user/" + userId))).thenReturn(requestHeadersSpecMock);
+        when(requestHeadersSpecMock.retrieve()).thenReturn(responseSpecMock);
+        when(responseSpecMock.bodyToMono(VehicleDTO[].class)).thenReturn(Mono.just(vehicleDTOArray));
 
         // Act
         UserCarsResponse userCarsResponse = userService.getUserById(userId);
@@ -90,9 +106,14 @@ public class UserServiceApplicationTests {
         assertEquals("john.doe@example.com", userCarsResponse.getEmail());
         assertEquals("1234567890", userCarsResponse.getPhoneNumber());
         assertEquals("123 Main St", userCarsResponse.getAddress());
+        assertEquals(1, userCarsResponse.getVehicles().size());
+        assertEquals(1L, userCarsResponse.getVehicles().get(0).getId());
 
         verify(userRepository, times(1)).findById(eq(userId));
         verify(webClient, times(1)).get();
+        verify(requestHeadersUriSpecMock, times(1)).uri(eq("http://null/api/vehicle/user/" + userId));
+        verify(requestHeadersSpecMock, times(1)).retrieve();
+        verify(responseSpecMock, times(1)).bodyToMono(VehicleDTO[].class);
     }
 
     @Test

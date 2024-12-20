@@ -12,16 +12,19 @@ import com.drivetogether.vehicleservice.repository.VehicleModelRepository;
 import com.drivetogether.vehicleservice.service.VehicleService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Function;
+import java.util.Optional;
 
-public class VehicleServiceApplicationTests {
+@ExtendWith(MockitoExtension.class)
+public class VehicleServiceUnitTests {
     @InjectMocks
     private VehicleService vehicleService;
 
@@ -45,8 +48,6 @@ public class VehicleServiceApplicationTests {
 
     @BeforeEach
     public void setUp() {
-        ReflectionTestUtils.setField(vehicleService, "vehicleRepository", vehicleRepository);
-        ReflectionTestUtils.setField(vehicleService, "webClient", webClient);
         ReflectionTestUtils.setField(vehicleService, "userServiceBaseUrl", "http://localhost:8080");
     }
 
@@ -54,6 +55,7 @@ public class VehicleServiceApplicationTests {
     public void testCreateVehicle() {
         // Arrange
         VehicleModel vehicleModel = new VehicleModel();
+        vehicleModel.setId(1L);
         vehicleModel.setModelName("TestModel");
 
         VehicleOwnerDTO vehicleOwnerDTO = new VehicleOwnerDTO();
@@ -82,13 +84,13 @@ public class VehicleServiceApplicationTests {
         vehicle.setLicensePlate("ABC123");
         vehicle.setModel(vehicleModel);
 
+        when(vehicleModelRepository.findById(1L)).thenReturn(Optional.of(vehicleModel));
         when(vehicleRepository.save(any(Vehicle.class))).thenReturn(vehicle);
 
-        // Mocking the web client
         when(webClient.get()).thenReturn(requestHeadersUriSpec);
-        when(requestHeadersUriSpec.uri(anyString(), any(Function.class))).thenReturn(requestHeadersSpec);
+        when(requestHeadersUriSpec.uri(anyString())).thenReturn(requestHeadersSpec);
         when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
-        when(responseSpec.bodyToMono(VehicleResponseDTO.class)).thenReturn(Mono.just(vehicleResponseDTO));
+        when(responseSpec.bodyToMono(VehicleOwnerDTO.class)).thenReturn(Mono.just(vehicleOwnerDTO));
 
         // Act
         VehicleResponseDTO result = vehicleService.createVehicle(vehicleRequestDTO);
@@ -102,9 +104,8 @@ public class VehicleServiceApplicationTests {
         assertEquals(1L, result.getOwner().getId());
 
         verify(vehicleRepository, times(1)).save(any(Vehicle.class));
-        verify(webClient, times(1)).get();  // Verify the webClient was used as expected
+        verify(webClient, times(1)).get();
     }
-
 
     @Test
     public void testGetAllVehicles() {
@@ -114,12 +115,20 @@ public class VehicleServiceApplicationTests {
         vehicle.setLicensePlate("ABC123");
         vehicle.setMake("Toyota");
         vehicle.setCapacity(5);
-
+        vehicle.setOwnerId(1L);
         VehicleModel model = new VehicleModel();
         model.setModelName("Corolla");
         vehicle.setModel(model);
 
+        VehicleOwnerDTO vehicleOwnerDTO = new VehicleOwnerDTO();
+        vehicleOwnerDTO.setId(1L);
+
         when(vehicleRepository.findAll()).thenReturn(Arrays.asList(vehicle));
+
+        when(webClient.get()).thenReturn(requestHeadersUriSpec);
+        when(requestHeadersUriSpec.uri(contains("/api/user/1"))).thenReturn(requestHeadersSpec);
+        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+        when(responseSpec.bodyToMono(VehicleOwnerDTO.class)).thenReturn(Mono.just(vehicleOwnerDTO));
 
         // Act
         List<VehicleResponseDTO> vehicleResponseDTOs = vehicleService.getAllVehicles();
@@ -130,6 +139,7 @@ public class VehicleServiceApplicationTests {
         assertEquals("Toyota", vehicleResponseDTOs.get(0).getMake());
 
         verify(vehicleRepository, times(1)).findAll();
+        verify(webClient, times(1)).get();
     }
 
     @Test
@@ -141,12 +151,21 @@ public class VehicleServiceApplicationTests {
         vehicle.setLicensePlate("ABC123");
         vehicle.setMake("Toyota");
         vehicle.setCapacity(5);
+        vehicle.setOwnerId(1L);
 
         VehicleModel model = new VehicleModel();
         model.setModelName("Corolla");
         vehicle.setModel(model);
 
+        VehicleOwnerDTO vehicleOwnerDTO = new VehicleOwnerDTO();
+        vehicleOwnerDTO.setId(1L);
+
         when(vehicleRepository.getReferenceById(vehicleId)).thenReturn(vehicle);
+
+        when(webClient.get()).thenReturn(requestHeadersUriSpec);
+        when(requestHeadersUriSpec.uri(contains("/api/user/1"))).thenReturn(requestHeadersSpec);
+        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+        when(responseSpec.bodyToMono(VehicleOwnerDTO.class)).thenReturn(Mono.just(vehicleOwnerDTO));
 
         // Act
         VehicleResponseDTO vehicleResponseDTO = vehicleService.getVehicleById(vehicleId);
@@ -157,6 +176,7 @@ public class VehicleServiceApplicationTests {
         assertEquals(5, vehicleResponseDTO.getCapacity());
 
         verify(vehicleRepository, times(1)).getReferenceById(vehicleId);
+        verify(webClient, times(1)).get();
     }
 
     @Test
@@ -169,6 +189,9 @@ public class VehicleServiceApplicationTests {
         vehicle1.setMake("Toyota");
         vehicle1.setCapacity(5);
         vehicle1.setOwnerId(userId);
+        VehicleModel model1 = new VehicleModel();
+        model1.setModelName("Corolla");
+        vehicle1.setModel(model1);
 
         Vehicle vehicle2 = new Vehicle();
         vehicle2.setId(2L);
@@ -176,6 +199,9 @@ public class VehicleServiceApplicationTests {
         vehicle2.setMake("Honda");
         vehicle2.setCapacity(4);
         vehicle2.setOwnerId(userId);
+        VehicleModel model2 = new VehicleModel();
+        model2.setModelName("Civic");
+        vehicle2.setModel(model2);
 
         when(vehicleRepository.findByOwnerId(userId)).thenReturn(Arrays.asList(vehicle1, vehicle2));
 
@@ -186,6 +212,8 @@ public class VehicleServiceApplicationTests {
         assertEquals(2, vehicles.size());
         assertEquals("ABC123", vehicles.get(0).getLicensePlate());
         assertEquals("DEF456", vehicles.get(1).getLicensePlate());
+        assertEquals("Corolla", vehicles.get(0).getModelName());
+        assertEquals("Civic", vehicles.get(1).getModelName());
 
         verify(vehicleRepository, times(1)).findByOwnerId(userId);
     }
