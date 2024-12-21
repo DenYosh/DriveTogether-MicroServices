@@ -104,6 +104,9 @@ services:
         ports:
             - 8083:8083
         environment:
+            USER_SERVICE_BASEURL: user-service:8080
+            VEHICLE_SERVICE_BASEURL: vehicle-service:8081
+            RIDE_SERVICE_BASEURL: ride-service:8082
             MONGODB_PORT: 27017
             MONGODB_HOST: mongo-booking
         networks:
