@@ -1,6 +1,9 @@
 import { atom } from "recoil";
 
-export const ApiUrl = "http://localhost:8084";
+export const ApiUrl =
+	process.env.NODE_ENV == "production"
+		? "http://localhost:8084"
+		: "http://localhost:8084";
 
 export const RedirectUri =
 	process.env.NODE_ENV == "production"

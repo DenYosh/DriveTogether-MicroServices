@@ -15,8 +15,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import org.springframework.web.reactive.function.client.WebClient.RequestBodyUriSpec;
+import org.springframework.web.reactive.function.client.WebClient.RequestBodySpec;
+import org.springframework.web.reactive.function.client.WebClient.ResponseSpec;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -41,6 +45,12 @@ public class BookingServiceUnitTest {
     private WebClient.RequestHeadersSpec requestHeadersSpec;
 
     @Mock
+    private WebClient.RequestBodyUriSpec requestBodyUriSpec;
+
+    @Mock
+    private WebClient.RequestBodySpec requestBodySpec;
+
+    @Mock
     private WebClient.ResponseSpec responseSpec;
 
     @BeforeEach
@@ -51,19 +61,27 @@ public class BookingServiceUnitTest {
     @Test
     public void testCreateBooking_Success() {
         // Arrange
-        Long userId = 1L;
-        Long rideId = 1L;
+        String userId = "1";
+        String rideId = "1";
         int seatsBooked = 2;
         LocalDateTime bookingTime = LocalDateTime.now();
 
         BookingRequestDTO bookingRequestDTO = new BookingRequestDTO("1", "1", seatsBooked);
-        RideDTO rideDTO = new RideDTO(rideId, 5, false);
+        RideDTO rideDTO = new RideDTO(Long.parseLong(rideId), 5, false);
         Booking booking = new Booking("1", "1", "1", seatsBooked, bookingTime);
 
+        ReflectionTestUtils.setField(bookingService, "rideServiceBaseUrl", "localhost:8082");
         when(webClient.get()).thenReturn(requestHeadersUriSpec);
-        when(requestHeadersUriSpec.uri(anyString())).thenReturn(requestHeadersSpec);
+        when(requestHeadersUriSpec.uri("http://localhost:8082/api/ride/1")).thenReturn(requestHeadersSpec);
         when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
         when(responseSpec.bodyToMono(RideDTO.class)).thenReturn(Mono.just(rideDTO));
+
+        when(webClient.put()).thenReturn(requestBodyUriSpec);
+        when(requestBodyUriSpec.uri("http://localhost:8082/api/ride/1/seatsBooked?delete=false&seatsBooked=2"))
+                .thenReturn(requestBodySpec);
+        when(requestBodySpec.retrieve()).thenReturn(responseSpec);
+        when(responseSpec.bodyToMono(RideDTO.class)).thenReturn(Mono.just(rideDTO));
+
         when(bookingRepository.save(any(Booking.class))).thenReturn(booking);
 
         // Act
@@ -76,7 +94,6 @@ public class BookingServiceUnitTest {
         assertEquals(rideId, responseDTO.getRideId());
         assertEquals(seatsBooked, responseDTO.getSeatsBooked());
 
-        // Verify that the save method was called once on the repository
         verify(bookingRepository, times(1)).save(any(Booking.class));
     }
 
@@ -119,25 +136,35 @@ public class BookingServiceUnitTest {
         assertEquals("No seats available", exception.getMessage());
     }
 
-//    @Test
-//    public void testDeleteBooking_Success() {
-//        // Arrange
-//        String bookingId = "booking123";
-//        Booking booking = new Booking(bookingId, "1", "1", 2, LocalDateTime.now());
-//
-//        when(bookingRepository.findById(bookingId)).thenReturn(java.util.Optional.of(booking));
-//        when(webClient.put()).thenReturn(requestHeadersUriSpec);
-//        when(requestHeadersUriSpec.uri(anyString())).thenReturn(requestHeadersSpec);
-//        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
-//        when(responseSpec.bodyToMono(RideDTO.class)).thenReturn(Mono.just(new RideDTO(1L, 5, false)));
-//
-//        // Act
-//        bookingService.deleteBooking(bookingId);
-//
-//        // Assert
-//        verify(bookingRepository, times(1)).findById(bookingId);
-//        verify(webClient, times(1)).put();
-//    }
+    @Test
+    public void testDeleteBooking_Success() {
+        // Arrange
+        String bookingId = "booking123";
+        Booking booking = new Booking(bookingId, "1", "1", 2, LocalDateTime.now());
+        RideDTO rideDTO = new RideDTO(1L, 5, false);
+
+        when(bookingRepository.findById(bookingId)).thenReturn(Optional.of(booking));
+
+        RequestBodyUriSpec requestBodyUriSpecMock = mock(RequestBodyUriSpec.class);
+        RequestBodySpec requestBodySpecMock = mock(RequestBodySpec.class);
+        ResponseSpec responseSpecMock = mock(ResponseSpec.class);
+
+        when(webClient.put()).thenReturn(requestBodyUriSpecMock);
+        when(requestBodyUriSpecMock.uri(anyString())).thenReturn(requestBodySpecMock);
+        when(requestBodySpecMock.retrieve()).thenReturn(responseSpecMock);
+        when(responseSpecMock.bodyToMono(RideDTO.class)).thenReturn(Mono.just(rideDTO));
+
+        // Act
+        bookingService.deleteBooking(bookingId);
+
+        // Assert
+        verify(bookingRepository, times(1)).findById(bookingId);
+        verify(webClient, times(1)).put();
+        verify(requestBodyUriSpecMock, times(1)).uri(anyString());
+        verify(requestBodySpecMock, times(1)).retrieve();
+        verify(responseSpecMock, times(1)).bodyToMono(RideDTO.class);
+    }
+
 
     @Test
     public void testDeleteBooking_BookingNotFound() {
