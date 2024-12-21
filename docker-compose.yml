@@ -1,3 +1,5 @@
+version: "3.8"
+
 services:
     mongo-booking:
         image: mongo:latest
@@ -5,6 +7,8 @@ services:
             - 27017:27017
         volumes:
             - mongodb_booking_data:/data/db
+        networks:
+            - drive-together-network
 
     mysql-user:
         image: mysql:latest
@@ -14,6 +18,8 @@ services:
             - mysql_user_data:/var/lib/mysql
         environment:
             MYSQL_ROOT_PASSWORD: abc123
+        networks:
+            - drive-together-network
 
     mysql-vehicle:
         image: mysql:latest
@@ -23,6 +29,8 @@ services:
             - mysql_vehicle_data:/var/lib/mysql
         environment:
             MYSQL_ROOT_PASSWORD: abc123
+        networks:
+            - drive-together-network
 
     mysql-ride:
         image: mysql:latest
@@ -32,6 +40,8 @@ services:
             - mysql_ride_data:/var/lib/mysql
         environment:
             MYSQL_ROOT_PASSWORD: abc123
+        networks:
+            - drive-together-network
 
     user-service:
         depends_on:
@@ -40,8 +50,6 @@ services:
         image: denyosh/user-service
         ports:
             - 8080:8080
-        links:
-            - mysql-user
         environment:
             VEHICLE_SERVICE_BASEURL: vehicle-service:8081
             RIDE_SERVICE_BASEURL: ride-service:8082
@@ -50,6 +58,8 @@ services:
             MYSQL_DB_PASSWORD: abc123
             MYSQL_DB_HOST: mysql-user
             MYSQL_DB_PORT: 3306
+        networks:
+            - drive-together-network
 
     vehicle-service:
         depends_on:
@@ -58,8 +68,6 @@ services:
         image: denyosh/vehicle-service
         ports:
             - 8081:8081
-        links:
-            - mysql-vehicle
         environment:
             USER_SERVICE_BASEURL: user-service:8080
             RIDE_SERVICE_BASEURL: ride-service:8082
@@ -67,7 +75,9 @@ services:
             MYSQL_DB_USERNAME: root
             MYSQL_DB_PASSWORD: abc123
             MYSQL_DB_HOST: mysql-vehicle
-            MYSQL_DB_PORT: 3307
+            MYSQL_DB_PORT: 3306
+        networks:
+            - drive-together-network
 
     ride-service:
         depends_on:
@@ -76,8 +86,6 @@ services:
         image: denyosh/ride-service
         ports:
             - 8082:8082
-        links:
-            - mysql-ride
         environment:
             USER_SERVICE_BASEURL: user-service:8080
             VEHICLE_SERVICE_BASEURL: vehicle-service:8081
@@ -86,6 +94,8 @@ services:
             MYSQL_DB_PASSWORD: abc123
             MYSQL_DB_HOST: mysql-ride
             MYSQL_DB_PORT: 3306
+        networks:
+            - drive-together-network
 
     booking-service:
         depends_on:
@@ -93,11 +103,11 @@ services:
         image: denyosh/booking-service
         ports:
             - 8083:8083
-        links:
-            - mongo-booking
         environment:
             MONGODB_PORT: 27017
             MONGODB_HOST: mongo-booking
+        networks:
+            - drive-together-network
 
     api-gateway:
         depends_on:
@@ -108,23 +118,24 @@ services:
         image: denyosh/api-gateway
         ports:
             - 8084:8084
-        links:
-            - vehicle-service
-            - ride-service
-            - booking-service
-            - user-service
         environment:
             USER_SERVICE_BASEURL: user-service:8080
             VEHICLE_SERVICE_BASEURL: vehicle-service:8081
             RIDE_SERVICE_BASEURL: ride-service:8082
             BOOKING_SERVICE_BASEURL: booking-service:8083
+        networks:
+            - drive-together-network
 
     drivetogether-front:
         image: denyosh/drivetogether-frontend
         ports:
             - 80:80
-        links:
-            - api-gateway
+        networks:
+            - drive-together-network
+
+networks:
+    drive-together-network:
+        driver: bridge
 
 volumes:
     mysql_user_data:

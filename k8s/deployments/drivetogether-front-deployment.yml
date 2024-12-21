@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: drivetogether-front
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: drivetogether-front
+    template:
+        metadata:
+            labels:
+                app: drivetogether-front
+        spec:
+            containers:
+                - name: drivetogether-frontend
+                  image: denyosh/drivetogether-frontend
+                  ports:
+                      - containerPort: 80

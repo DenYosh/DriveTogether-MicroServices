@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: api-gateway
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: api-gateway
+    template:
+        metadata:
+            labels:
+                app: api-gateway
+        spec:
+            containers:
+                - name: api-gateway
+                  image: denyosh/api-gateway
+                  ports:
+                      - containerPort: 8084
+                  env:
+                      - name: USER_SERVICE_BASEURL
+                        value: user-service:8080
+                      - name: VEHICLE_SERVICE_BASEURL
+                        value: vehicle-service:8081
+                      - name: RIDE_SERVICE_BASEURL
+                        value: ride-service:8082
+                      - name: BOOKING_SERVICE_BASEURL
+                        value: booking-service:8083

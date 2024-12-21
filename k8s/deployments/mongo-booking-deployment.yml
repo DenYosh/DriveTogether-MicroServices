@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: mongo-booking
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: mongo-booking
+    template:
+        metadata:
+            labels:
+                app: mongo-booking
+        spec:
+            containers:
+                - name: mongo-booking
+                  image: mongo:latest
+                  ports:
+                      - containerPort: 27017
+                  volumeMounts:
+                      - mountPath: /data/db
+                        name: mongodb-data
+            volumes:
+                - name: mongodb-data
+                  persistentVolumeClaim:
+                      claimName: mongodb-data-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: mongo-booking
+spec:
+    type: ClusterIP
+    ports:
+        - port: 27017
+          targetPort: 27017
+    selector:
+        app: mongo-booking
