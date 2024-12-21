@@ -60,8 +60,6 @@ public class RideService {
         List<Ride> rides = rideRepository.findAll();
 
         return rides.stream().map(this::mapToResponseDTO).toList();
-
-//        return rideRepository.findAll().stream().map(this::mapToResponseDTO).collect(Collectors.toList());
     }
 
     public RideResponseDTO getRideById(Long id) {
